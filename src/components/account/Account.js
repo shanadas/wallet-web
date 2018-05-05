@@ -3,18 +3,19 @@ import {connect} from "react-redux";
 import {tu} from "../../utils/i18n";
 import {loadTokenBalances} from "../../actions/account";
 import {BarLoader} from "../common/loaders";
-import {passwordToAddress} from "@tronprotocol/wallet-api/src/utils/crypto";
+import {passwordToAddress} from "tronaccount/src/utils/crypto";
 import xhr from "axios";
 import {FormattedNumber} from "react-intl";
+import {Link, Redirect} from "react-router-dom";
 
 class Account extends Component {
 
   constructor() {
     super();
-
     this.state = {
       waitingForTrx: false,
       showRequest: true,
+      showPassword:false,
       trxRequestResponse: {
         success: false,
         code: -1,
@@ -29,9 +30,49 @@ class Account extends Component {
 
   reloadTokens = () => {
     let {account, loadTokenBalances} = this.props;
-    loadTokenBalances(passwordToAddress(account.key));
+    if(account.isLoggedIn)
+      loadTokenBalances(passwordToAddress(account.key));
   };
 
+  isTronix(index){
+      if (index == 0) {
+            return (
+                  "bg-primary"
+            );
+      }
+  }
+  
+  renderTronix() {
+
+    let {tokenBalances = []} = this.props;
+
+    if (tokenBalances.length === 0) {
+      return (
+        <div className="text-center d-flex justify-content-center p-4">
+          <BarLoader/>
+        </div>
+      );
+    }
+
+    return (
+      <div className="t-3">
+        {
+          tokenBalances.map((token, index) => (
+            
+            (index === 0 && token.name == "TRX") && //Only shows TRON TRX on this view   
+             <div className="text-center">
+              <h2 className="text-secondary">{tu("trx_balance")}</h2>
+              <h1>
+               <FormattedNumber value={token.balance}/>
+              </h1>    
+             </div> 
+            
+          ))
+        }
+      </div>
+    )
+  }
+  
   renderTokens() {
 
     let {tokenBalances = []} = this.props;
@@ -54,13 +95,16 @@ class Account extends Component {
         </thead>
         <tbody>
         {
-          tokenBalances.map((token) => (
-            <tr key={token.name}>
+          tokenBalances.map((token, index) => (
+            
+            (index > 0) && //Hide TRON TRX on this view   
+            <tr key={index}>
               <td>{token.name}</td>
               <td className="text-right">
                 <FormattedNumber value={token.balance} />
               </td>
             </tr>
+            
           ))
         }
         </tbody>
@@ -77,7 +121,7 @@ class Account extends Component {
 
       let address = passwordToAddress(account.key);
 
-      let {data} = await xhr.post(`${window.location.origin}/request-coins`, {
+      let {data} = await xhr.post(`https://tronscan.org/request-coins`, {
         address,
       });
 
@@ -107,6 +151,11 @@ class Account extends Component {
     }
   };
 
+  showPword (){
+      this.setState({
+          showPassword: true
+      });
+  }
   renderTestnetRequest() {
 
     let {waitingForTrx, trxRequestResponse} = this.state;
@@ -123,7 +172,7 @@ class Account extends Component {
       if (trxRequestResponse.success === true) {
         return (
           <div className="alert alert-success text-success">
-            10000 TRX {tu("have_been_added_to_your_account!")}
+            1000000 TRX {tu("have_been_added_to_your_account!")}
           </div>
         )
       } else {
@@ -143,8 +192,6 @@ class Account extends Component {
         </button>
         <p className="pt-1">
           {tu("information_message_1")}
-          <br/>
-          {tu("information_message_2")}
         </p>
       </React.Fragment>
     );
@@ -153,9 +200,13 @@ class Account extends Component {
   render() {
 
     let {account} = this.props;
-    let {showRequest} = this.state;
-
+    if (!account.isLoggedIn) {
+      return <Redirect to="/login" />;
+    }     
+   
+    let {showRequest,showPassword} = this.state;
     let address = passwordToAddress(account.key);
+    let key = account.key;
 
     return (
       <main className="container pt-3">
@@ -165,7 +216,7 @@ class Account extends Component {
         <div className="row">
           <div className="col-md-12">
             <div className="card">
-              <div className="card-header text-center">
+              <div className="card-header text-center bg-dark text-white">
                 {tu("account")}
               </div>
               <div className="card-body">
@@ -180,6 +231,17 @@ class Account extends Component {
                     </span>
                   </div>
                 </div>
+                <div className="row pt-3">
+                  <div className="col-md-2">
+                    <b>{tu("password")}</b>
+                  </div>
+                  <button className={"btn btn-primary btn-sm " + (showPassword ? 'hide' : 'show')} onClick={this.showPword.bind(this)}>
+                      {tu("showpassword")}
+                  </button>
+                  <div className={showPassword?'col-md-10 show':'col-md-10 hide'}>
+                      {key}<br/>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -187,7 +249,16 @@ class Account extends Component {
         <div className="row mt-3">
           <div className="col-md-12">
             <div className="card">
-              <div className="card-header border-bottom-0 text-center">
+              <div className="card-body p-3 border-0">
+                {this.renderTronix()}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="row mt-3">
+          <div className="col-md-12">
+            <div className="card">
+              <div className="card-header border-bottom-0 text-center bg-dark text-white">
                 {tu("tokens")}
               </div>
               <div className="card-body p-0 border-0">
@@ -200,7 +271,7 @@ class Account extends Component {
           showRequest && <div className="row mt-3">
             <div className="col-md-12">
               <div className="card">
-                <div className="card-header border-bottom-0 text-center">
+                <div className="card-header border-bottom-0 text-center bg-dark text-white">
                   {tu("testnet")}
                 </div>
                 <div className="card-body text-center">

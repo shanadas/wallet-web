@@ -1,4 +1,4 @@
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "../../node_modules/bootstrap/scss/bootstrap";
 @import "theme";
 @import "variables";
 
@@ -35,6 +35,10 @@ body {
 
 .node-map {
   height: 600px;
+}
+
+.social {
+  font-size: 20px;
 }
 
 

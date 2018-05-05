@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import {connect} from "react-redux";
-import {sortBy} from "lodash";
+import {filter, sortBy} from "lodash";
 import {loadTokens} from "../../actions/tokens";
 import {FormattedDate, FormattedNumber, FormattedTime} from "react-intl";
 import {tu, tv} from "../../utils/i18n";
@@ -9,6 +9,11 @@ import {Client} from "../../services/api";
 import MediaQuery from "react-responsive";
 import {ONE_TRX} from "../../constants";
 
+const desStyle = {
+    whiteSpace: "normal",
+    wordSrap: "break-word",
+    wordBreak:"break-all"
+}
 class TokensView extends Component {
 
   constructor() {
@@ -121,19 +126,20 @@ class TokensView extends Component {
   }
 
   renderTable() {
-    let {tokens, account} = this.props;
+    let {tokens, account, searchString} = this.props;
     let {amount, confirmedParticipate, loading, participateSuccess} = this.state;
 
+    tokens = filter(tokens, t => t.name.toUpperCase().indexOf(searchString) !== -1);
     tokens = sortBy(tokens, t => t.name);
 
     return (
       <table className="table table-striped">
         <thead className="thead-dark">
           <tr>
-            <th>{tu("name")}</th>
-            <th>{tu("issuer")}</th>
-            <th className="text-right">{tu("total_supply")}</th>
-            <th>{tu("start_end_time")}</th>
+            <th style={{verticalAlign: 'baseline'}}>{tu("name")}</th>
+            <th style={{verticalAlign: 'baseline'}}>{tu("issuer")}</th>
+            <th style={{verticalAlign: 'baseline'}} className="text-right">{tu("total_supply")}</th>
+            <th style={{verticalAlign: 'baseline'}} className="text-center">{tu("start_end_time")}</th>
             <th>&nbsp;</th>
           </tr>
         </thead>
@@ -142,10 +148,12 @@ class TokensView extends Component {
           tokens.map((token, index) => (
             <Fragment key={index}>
               <tr key={token.name}>
-                <td>{token.name}</td>
+                <td>
+                  {(token.name.length > 25) ? token.name.substr(0, 25)+" ..." : token.name}
+                </td>
                 <td>
                   <span title={token.ownerAddress}>
-                    {token.ownerAddress.substr(0, 16)}...
+                    {token.ownerAddress}
                   </span>
                 </td>
                 <td className="text-right">
@@ -154,7 +162,7 @@ class TokensView extends Component {
                 <td>
                   <FormattedDate value={token.startTime}/>&nbsp;
                   <FormattedTime value={token.startTime}/>&nbsp;
-                  -&nbsp;
+                  <br/>
                   <FormattedDate value={token.endTime}/>&nbsp;
                   <FormattedTime value={token.endTime}/>
                 </td>
@@ -169,7 +177,7 @@ class TokensView extends Component {
                   participateSuccess ? <tr>
                       <td colSpan="5">
                         <div className="alert alert-success text-center">
-                          You succesfully partipated!
+                        {tu("participated")}
                         </div>
                       </td>
                     </tr>
@@ -191,7 +199,7 @@ class TokensView extends Component {
                       <div className="form-group row no-gutters">
                         <label className="col-2 font-weight-bold text-right">{tu("description")}</label>
                         <div className="col-sm-9">
-                          <div className="pl-2">{token.description}</div>
+                          <div className="pl-2" style={desStyle}>{token.description}</div>
                         </div>
                       </div>
                       <div className="form-group row no-gutters">
@@ -249,6 +257,7 @@ class TokensView extends Component {
   renderSmallDate(token) {
 
     let now = new Date().getTime();
+    let {account} = this.props;
 
     if (token.endTime < now) {
       return (
@@ -271,7 +280,7 @@ class TokensView extends Component {
             <FormattedTime value={token.startTime}/>
           </span>
           {
-            !this.containsToken(token) &&  <button
+            (!this.containsToken(token) && account.isLoggedIn) &&  <button
               className="btn btn-primary btn-sm float-right"
               onClick={() => this.toggleToken(token)}>
               {tu("participate")}
@@ -294,9 +303,10 @@ class TokensView extends Component {
   }
 
   renderSmallTable() {
-    let {tokens} = this.props;
+    let {tokens, searchString} = this.props;
     let {amount, confirmedParticipate, loading, participateSuccess} = this.state;
 
+    tokens = filter(tokens, t => t.name.indexOf(searchString) !== -1);
     tokens = sortBy(tokens, t => t.name);
 
     return (
@@ -408,6 +418,7 @@ function mapStateToProps(state) {
   return {
     tokens: state.tokens.tokens,
     account: state.app.account,
+    searchString: state.app.searchString,
   };
 }
 

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from "react-redux";
 import {t, tu} from "../../utils/i18n";
+import {Link, Redirect} from "react-router-dom";
 import {Client} from "../../services/api";
 
 class ApplyForDelegate extends Component {
@@ -41,7 +42,7 @@ class ApplyForDelegate extends Component {
     if (applyResponse === true ){
       return (
         <div className="alert alert-success text-center">
-          Thanks for your apply!
+          {tu("thanks_for_applying")}
         </div>
       )
     }
@@ -65,14 +66,18 @@ class ApplyForDelegate extends Component {
   }
 
   render() {
-
+      
+    let {account} = this.props;
+    if (!account.isLoggedIn) {
+      return <Redirect to="/login" />;
+    } 
 
     return (
       <main className="container pt-5 pb-5">
         <div className="row justify-content-center">
           <div className="col-md-8">
             <div className="card">
-              <div className="card-header text-center">
+              <div className="card-header text-center bg-dark text-white">
                 {tu("apply_for_delegate")}
               </div>
               <div className="card-body">

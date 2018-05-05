@@ -2,7 +2,8 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import TronLogo from "../../images/trans_tron_logo.png";
-import {generateAccount} from "@tronprotocol/wallet-api/src/utils/account";
+// import {generateAccount} from "tronaccount/src/utils/account";
+import {generateAccount} from "tronaccount/src/utils/account";
 import {loginWithPassword} from "../../actions/app";
 import {connect} from "react-redux";
 import {tu} from "../../utils/i18n";
@@ -80,7 +81,7 @@ class Login extends Component {
 
     return true;
   };
-
+  
   renderLogin() {
 
     return (
@@ -88,10 +89,8 @@ class Login extends Component {
         <p className="text-center">
           <img src={TronLogo} alt="Tron"/><br/>
         </p>
-        <h5>{tu("Welcome to TRON")}</h5>
         <p className="mt-5">
-          <label>{tu("password")}</label>
-          <input className="form-control" type="password" onChange={(ev) => this.setState({ loginPassword: ev.target.value })}/>
+          <input className="form-control" type="password" placeholder="Password..." onChange={(ev) => this.setState({ loginPassword: ev.target.value })}/>
         </p>
         <p>
           <button
@@ -102,7 +101,7 @@ class Login extends Component {
         <p>
           <a href="javascript:;"
              onClick={() => this.setState({ activeTab: 'register' })}
-             className="card-link">{tu("or register a new account")}</a>
+             className="card-link">{tu("register_new_account")}</a>
         </p>
       </div>
     )
@@ -117,16 +116,15 @@ class Login extends Component {
         <p className="text-center">
           <img src={TronLogo} alt="Tron"/><br/>
         </p>
-        <h5 className="text-center">{tu("register")}</h5>
         <div className="mt-5">
           <p>
             <button className="btn btn-primary col-sm" onClick={this.generateAccount}>
-              {tu("generate_account")}
+              <i className="fa fa-redo"/> {tu("generate_account")}
             </button>
           </p>
           <form>
             <div className="form-group">
-              <label>{tu("Account Address")}</label>
+              <label>{tu("account_address")}</label>
               <div className="input-group mb-3">
                 <input
                   type="text"
@@ -160,48 +158,49 @@ class Login extends Component {
                 </div>
               </div>
             </div>
-            <div className="form-group">
-              <label>{tu("Private Key")}</label>
-              <div className="input-group mb-3">
-                <input type="text"
-                       readOnly={true}
-                       onChange={(ev) => this.setState({ privateKey: ev.target.value })}
-                       className="form-control"
-                       value={privateKey} />
-                <div className="input-group-append">
-                  <CopyToClipboard text={privateKey}>
-                    <button className="btn btn-outline-secondary" type="button">
-                      <i className="fa fa-paste"/>
-                    </button>
-                  </CopyToClipboard>
-                </div>
-              </div>
-            </div>
+            {/*<div className="form-group">*/}
+            {/*<label>{tu("Private Key")}</label>*/}
+            {/*<div className="input-group mb-3">*/}
+              {/*<input type="text"*/}
+                     {/*readOnly={true}*/}
+                     {/*onChange={(ev) => this.setState({ privateKey: ev.target.value })}*/}
+                     {/*className="form-control"*/}
+                     {/*value={privateKey} />*/}
+              {/*<div className="input-group-append">*/}
+                {/*<CopyToClipboard text={privateKey}>*/}
+                  {/*<button className="btn btn-outline-secondary" type="button">*/}
+                    {/*<i className="fa fa-paste"/>*/}
+                  {/*</button>*/}
+                {/*</CopyToClipboard>*/}
+              {/*</div>*/}
+            {/*</div>*/}
+          {/*</div>*/}
             <div className="form-check">
               <input type="checkbox"
                      className="form-check-input" onChange={(ev) => this.setState({ registerCheck1: ev.target.checked })} />
-              <label className="form-check-label">
+              <label className="form-check-label small">
                 {tu("create_account_confirm_1")}
               </label>
             </div>
             <div className="form-check" onChange={(ev) => this.setState({ registerCheck2: ev.target.checked })}>
               <input type="checkbox" className="form-check-input" />
-              <label className="form-check-label">
+              <label className="form-check-label small">
                 {tu("create_account_confirm_2")}
               </label>
             </div>
             <div className="form-check" onChange={(ev) => this.setState({ registerCheck3: ev.target.checked })}>
               <input type="checkbox" className="form-check-input" />
-              <label className="form-check-label">
+              <label className="form-check-label small">
                 {tu("create_account_confirm_3")}
               </label>
             </div>
           </form>
+
         </div>
         <p className="mt-3">
           <button className="btn btn-outline-success col-sm"
                   disabled={!this.isRegisterFormValid()}
-                  onClick={this.createAccount}>{tu("Create Account")} </button>
+                  onClick={this.createAccount}>{tu("create_account")} </button>
         </p>
       </div>
     )
@@ -244,7 +243,7 @@ class Login extends Component {
         {this.renderTestNetWarning()}
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-12 col-sm-8 col-lg-5">
+            <div className="col-12 col-sm-12 col-md-8 col-lg-6">
               <div className="card">
                 <div className="card-header">
                   <ul className="nav nav-tabs card-header-tabs justify-content-center">

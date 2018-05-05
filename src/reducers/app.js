@@ -1,6 +1,6 @@
 import Lockr from "lockr";
 
-import {LOGIN, LOGOUT, SET_ACCOUNTS, SET_LANGUAGE, SET_PRICE} from "../actions/app";
+import {LOGIN, LOGOUT, SET_ACCOUNTS, SET_LANGUAGE, SET_PRICE, SEARCH} from "../actions/app";
 
 const initialState = {
   accounts: [],
@@ -15,6 +15,8 @@ const initialState = {
     fa:"فارسی",
     ko:"한국어",
     br: "Português Brasil",
+    fr: "Français",
+    es: "Español" ,
   },
   activeLanguage: 'en',
   account: {
@@ -22,6 +24,7 @@ const initialState = {
     address: undefined,
     isLoggedIn: Lockr.get("account_key") !== undefined,
   },
+  searchString: '',
 };
 
 export function appReducer(state = initialState, action) {
@@ -82,6 +85,13 @@ export function appReducer(state = initialState, action) {
           key: undefined,
           isLoggedIn: false,
         }
+      }
+    }
+
+    case SEARCH: {
+      return {
+        ...state,
+        searchString: action.searchString
       }
     }
 
